@@ -28,6 +28,22 @@ export default async function handleRequest(req: Request & { nextUrl?: URL }) {
   const url = new URL(pathname + search, "https://api.openai.com").href;
   const headers = pickHeaders(req.headers, ["content-type", "authorization"]);
 
+  // Retrieve OpenAI key from environment variable
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+  if (!openaiApiKey) {
+    return new Response("OpenAI API key not provided", { status: 401 });
+  }
+  
+  // Set OpenAI key in headers
+  headers.set("authorization", openaiApiKey);
+
+  // Log the request parameters
+  console.log('Request Parameters:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(headers.entries()),
+  });
+
   const res = await fetch(url, {
     body: req.body,
     method: req.method,
